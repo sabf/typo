@@ -2,20 +2,20 @@ from __future__ import absolute_import
 
 __all__ = ['app']
 
+from ConfigParser import SafeConfigParser as ConfigParser
 from urlparse import urlparse, urlunparse
-from flask import Flask, request, redirect
-from tldextract import extract
-from fuzzywuzzy import process
 
-BASE = 'sabf.org.ar'
-CUTOFF = 80
-DEFAULT_SITE = 'www'
-MATCH_SITES = {
-    'site': 'www',
-    'blog': 'blog',
-    'apply': 'apply',
-    'recruiting': 'www',
-}
+from flask import Flask, request, redirect
+from fuzzywuzzy import process
+from tldextract import extract
+
+config = ConfigParser()
+config.read(['config.ini', 'config.ini.tpl'])
+
+BASE = config.get('typo', 'base')
+CUTOFF = config.getint('typo', 'cutoff')
+DEFAULT_SITE = config.get('typo', 'default_site')
+MATCH_SITES = dict(config.items('match_sites'))
 
 app = Flask(__name__)
 
