@@ -1,7 +1,8 @@
 [uwsgi]
 module = typo:app
 pythonpath = %d
-env = %denv
+virtualenv = %denv
+chdir = %d
 
 touch-reload = %d/uwsgi.ini
 touch-reload = %d/uwsgi.app

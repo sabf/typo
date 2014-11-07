@@ -29,8 +29,7 @@ def catch_all(path):
 def replace_host(url, host):
     parsed = urlparse(url)
     netloc = u'%s.%s' % (host, BASE)
-    parsed = parsed[:1] + (netloc,) + parsed[2:]
-    return urlunparse(parsed)
+    return urlunparse(parsed[:1] + (netloc,) + parsed[2:])
 
 def get_best_match(url):
     original_url = extract(request.url)

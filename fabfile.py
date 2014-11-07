@@ -1,13 +1,14 @@
 from __future__ import with_statement
 
 import os
+from os.path import realpath, dirname, basename
 
 from fabric.api import *
 from fabric.contrib.files import upload_template
 
 
 BASE = "/srv"
-REPO = "git@github.com:sabf/typo.git"
+REPO = "https://github.com/sabf/typo.git"
 
 # env injector. See:
 # https://github.com/jacobian/django-dotenv/blob/master/dotenv.py
@@ -28,24 +29,25 @@ try:
 except IOError:
     print "Can't load .env file."
 
-default_target = os.path.dirname(os.path.realpath(__file__))
+default_target = basename(dirname(realpath(__file__)))
 TARGET = os.environ.get("FAB_DEPLOY_TARGET", default_target)
 
 
 ## Fab commands
 
 def flask_deploy(rev=None, user="www-data", reset=False):
-    run("rm uwsgi.ini", user=user)
+    sudo("rm uwsgi.ini || true")
     if reset:
-        run("git reset --hard", user=user)
-    run("git pull", user=user)
+        sudo("git reset --hard", user=user)
+    sudo("git pull", user=user)
     branch = 'master' if not rev else rev
     if branch:
-        run("git checkout {branch}".format(branch=rev))
-    run("git pull origin {branch}".format(branch=rev))
+        sudo("git checkout {branch}".format(branch=rev))
+    sudo("git pull origin {branch}".format(branch=rev))
     with prefix(". env/bin/activate"):
-        run("pip install -r requirements.txt", user=user)
-    run("ln -s uwsgi.app uwsgi.ini", user=user)
+        sudo("pip install -r requirements.txt", user=user)
+    sudo("chown -R {user}:{user} .".format(user=user))
+    sudo("ln -s uwsgi.app uwsgi.ini", user=user)
 
 def restart_service(target):
     sudo("service {target} restart".format(target=target))
@@ -61,25 +63,24 @@ def update(branch=None, target=None, user='www-data'):
 def setup_venv(user, target=None):
     directory = os.path.join(BASE, target or TARGET)
     with cd(directory):
-        sudo("virtualenv {target}/env/".format(target=target))
-        sudo("chown -R {user}:{user} {target}".format(**locals()))
+        sudo("virtualenv env", user=user)
+        sudo("chown -R {user}:{user} env".format(user=user))
 
 def setup(branch='master', user='www-data', target=None):
     target = target or TARGET
     directory = os.path.join(BASE, target)
-    with cd(directory):
-        sudo("apt-get install -y python-distribute python-virtualenv")
+    with cd(BASE):
         # pull from git repo
         destroy(target=target)
         sudo("git clone {url} {target}".format(url=REPO, target=target))
+        sudo("chown -R {user}:{user} .".format(user=user))
         setup_venv(user, target)
         update(branch, target, user)
 
 def destroy(target=None):
     target = target or TARGET
-    directory = os.path.join(BASE, target)
-    with cd(directory):
-        sudo("rm -rf {dst}".format(dst=target))
+    with cd(BASE):
+        sudo("rm -rf {dst} || true".format(dst=target))
 
 def deploy(branch="master", target=None):
     update(branch, target)
