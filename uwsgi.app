@@ -10,6 +10,6 @@ touch-reload = %d/typo.py
 
 harakiri = 10
 max-requests = 500
-vacuum = truevacuum = true
+vacuum = true
 process = 1
 
