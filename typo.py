@@ -19,6 +19,7 @@ MATCH_SITES = dict(config.items('match_sites'))
 
 app = Flask(__name__)
 
+
 @app.route('/', defaults={'path': ''})
 @app.route(r'/<path:path>')
 def catch_all(path):
@@ -26,10 +27,12 @@ def catch_all(path):
     new_url = replace_host(request.url, redirect_to)
     return redirect(new_url)
 
+
 def replace_host(url, host):
     parsed = urlparse(url)
     netloc = u'%s.%s' % (host, BASE)
     return urlunparse(parsed[:1] + (netloc,) + parsed[2:])
+
 
 def get_best_match(url):
     original_url = extract(request.url)
