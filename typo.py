@@ -35,7 +35,7 @@ def replace_host(url, host):
 
 
 def get_best_match(url):
-    original_url = extract(request.url)
+    original_url = extract(url)
     sub = original_url.subdomain
     closest, score = process.extractOne(sub, MATCH_SITES.keys(),
             score_cutoff=CUTOFF) or (None, 0)
