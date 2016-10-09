@@ -13,3 +13,4 @@ max-requests = 500
 vacuum = true
 process = 1
 
+add-header = X-Typo: True
