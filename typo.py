@@ -25,7 +25,7 @@ app = Flask(__name__)
 def catch_all(path):
     redirect_to = get_best_match(request.url)
     new_url = replace_host(request.url, redirect_to)
-    return redirect(new_url)
+    return redirect(new_url + '#redirected=true')
 
 
 def replace_host(url, host):
@@ -38,5 +38,5 @@ def get_best_match(url):
     original_url = extract(url)
     sub = original_url.subdomain
     closest, score = process.extractOne(sub, MATCH_SITES.keys(),
-            score_cutoff=CUTOFF) or (None, 0)
+                                        score_cutoff=CUTOFF) or (None, 0)
     return MATCH_SITES.get(closest, DEFAULT_SITE)
